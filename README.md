@@ -1,7 +1,6 @@
-# JeuPlusOuMoinsCpp
- Jeu + ou moins
+# Jeu + ou -
 
-## Fonctionalités
+## Fonctionnalités
 - Affichage des règles
 - Affichage des parties rècentes
      - Meilleures parties
