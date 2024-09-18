@@ -9,3 +9,5 @@
 - Jeu solo
 - Jeu à plusieurs
 - Paramètres
+
+*Jeu créé pour un projet d'études*
