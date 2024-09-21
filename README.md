@@ -8,15 +8,7 @@
 
 ```                                                        
 
-Un petit jeu simple créé pour un projet d'études
-
-
-
-
-## Authors
-
-- [@liamgen.js](https://www.github.com/liam-gen)
-
+Un jeu simple créé pour un projet d'études
 
 ## Fonctionnalités
 

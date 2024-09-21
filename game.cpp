@@ -324,6 +324,7 @@ class Game
         this->show("3. Lancer le jeu en solo");
         this->show("4. Lancer le jeu à plusieurs");
         this->show("5. Paramètres");
+        this->show("6. Informations");
 
         this->show("\nEntrez une action : ", false);
 
@@ -347,7 +348,23 @@ class Game
             case 5:
                 startSettings();
                 break;
+            case 6:
+                startInfos();
+                break;
         };
+    }
+
+    void startInfos()
+    {
+        this->clear();
+        this->start();
+
+        this->show(this->style.get("Informations", "bold"));
+        this->show("======================");
+        this->show("GitHub : https://github.com/liam-gen/plus-or-minus-game");
+
+        this->show("\n\n");
+        this->showMenu();
     }
 
     void startSettings() {
