@@ -54,6 +54,49 @@ public:
     }
 };
 
+struct Setting {
+    string id;
+    string name;
+    int value;
+};
+
+class Settings {
+
+    public:
+        vector<Setting> settings;
+
+        Settings() {
+            settings.push_back({ "min", "Nombre minimum", 0 });
+            settings.push_back({ "max", "Nombre maximum", 100 });
+        }
+
+        int get(const string& id) {
+            for (const auto& setting : settings) {
+                if (setting.id == id) {
+                    return setting.value;
+                }
+            }
+            return -1;
+        }
+
+        string getName(const string& id) {
+            for (const auto& setting : settings) {
+                if (setting.id == id) {
+                    return setting.name;
+                }
+            }
+        }
+
+        void setValue(const string& id, int valeur) {
+            for (auto& setting : settings) {
+                if (setting.id == id) {
+                    setting.value = valeur;
+                    return;
+                }
+            }
+        }
+};
+
 class GameSession {
     public:
         vector<Player> players;
@@ -69,16 +112,7 @@ class Game
         vector<Player> players;
         vector<GameSession> games;
         chrono::high_resolution_clock::time_point startTime;
-
-        map<string, int> settings = {
-            {"max", 100},
-            {"min", 0},
-        };
-
-        map<string, string> settingsName = {
-            {"max", "Nombre maximum"},
-            {"min", "Nombre minimum"},
-        };
+        Settings settings = Settings();
 
         // récupérer la partie dans celles stockées avec le meilleur temps et le moins de tentatives
 
@@ -110,7 +144,7 @@ class Game
 
    public:
        // Nombre à faire deviner
-       int number = this->generateRandomNumber(this->settings["min"], this->settings["max"]);
+       int number = this->generateRandomNumber(this->settings.get("min"), this->settings.get("max"));
 
        // Pour la boucle while (tant que la partie est pas finie)
        int ended = false;
@@ -137,7 +171,7 @@ class Game
     {
         // Remettre tout à 0 (nombre de joeurs, nombre, console, ...) et tout charger
         this->ended = false;
-        this->number = this->generateRandomNumber(this->settings["min"], this->settings["max"]);
+        this->number = this->generateRandomNumber(this->settings.get("min"), this->settings.get("max"));
 
         this->players.clear();
 
@@ -243,6 +277,7 @@ class Game
         {
             cin.clear();
             cin.ignore(1000, '\n');
+            // TOFIX : Afficher les nombres des paramètres
             this->show("Vous devez entrer un nombre entre 0 et 100 !\nRéssayez : ", false);
             return this->askForNumberCin();
         }
@@ -321,8 +356,8 @@ class Game
 
         this->show(this->style.get("Paramètres du jeu", "bold"));
         this->show("======================");
-        for (const auto& setting : this->settings) {
-            this->show(this->style.get(this->settingsName[setting.first], "bold") + " : " + to_string(setting.second));
+        for (const auto& setting : this->settings.settings) {
+            this->show(this->style.get(setting.name, "bold") + " : " + to_string(setting.value));
         }
         this->show("\n\n");
 
@@ -336,8 +371,8 @@ class Game
         this->show("1. Retourner au menu");
 
         int z = 2;
-        for (const auto& setting : this->settings) {
-            this->show(to_string(z)+". Changer la valeur de \""+this->style.get(this->settingsName[setting.first], "bold") + "\"");
+        for (const auto& setting : this->settings.settings) {
+            this->show(to_string(z)+". Changer la valeur de \""+this->style.get(setting.name, "bold") + "\"");
             z++;
         }
 
@@ -353,31 +388,37 @@ class Game
             this->showMenu();
         }
         else {
-            this->askForChangeSetting(x - (z + 1));
+            this->askForChangeSetting(x - 2);
         }
 
         
     }
 
-    void askForChangeSetting(int settingIndex) {
-        // Obtenir la paramètre en fonction de l'index
-        auto setting = this->settings.begin();
-        advance(setting, settingIndex);
+    void askForChangeSetting(int index) {
+        if (index < 0 || index >= this->settings.settings.size()) {
+            cout << "Erreur: Index inconnu " << index << endl;
+            return;
+        }
 
-        this->show("\nChanger la valeur de \""+ this->settingsName[setting->first] +"\" : ", false);
+        Setting& setting = this->settings.settings[index];
+
+        cout << "\nChanger la valeur de \"" << setting.name << "\" : ";
 
         int x;
         cin >> x;
 
-        if (cin.fail())
-        {
+        if (cin.fail()) {
             cin.clear();
             cin.ignore(1000, '\n');
-            this->show("Vous devez entrer un nombre!\nRéssayez : ", false);
-            return this->askForChangeSetting(settingIndex);
+            cout << "Vous devez entrer un nombre!\nRéessayez : ";
+            return this->askForChangeSetting(index);
         }
 
-        setting->second = x;
+        // Modifier la valeur
+        
+        this->settings.setValue(setting.id, x);
+
+        cout << "La nouvelle valeur de \"" << setting.name << "\" est : " << setting.value << endl;
 
         this->startSettings();
     }
