@@ -27,9 +27,9 @@ Un petit jeu simple créé pour un projet d'études
 - Jeu à plusieurs
 - Paramètres
 
-## Demo
+## Démo
 
-
+![Vidéo de démo](demo.gif)
 
 ```
  _             _ _                                     _     
