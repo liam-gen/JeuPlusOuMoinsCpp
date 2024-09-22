@@ -19,6 +19,10 @@ using namespace std;
 // Accéder à system() pour vider la console
 #include <cstdlib>
 
+// Stockage des parties
+#include <sstream>
+#include <fstream>
+
 class Style
 {
 private:
@@ -112,15 +116,65 @@ class Settings {
         }
 };
 
-// Sauvegarder en mémoire les parties précédentes (joueurs, durée, nombre à trouver, score)
+string getSaveFile()
+{
+    char appDataPath[MAX_PATH];
 
-// TOFIX: Sauvegarder en fichier plutôt qu'en mémoire
+    // Récupérer le dossier appdata pour stocker les parties
+    DWORD result = GetEnvironmentVariableA("APPDATA", appDataPath, MAX_PATH);
+
+    return string(appDataPath) + "/JeuPlusOuMoins.csv";
+}
+
+// Vérifier si le fichier est vide
+bool is_file_empty(const string& filename) {
+    ifstream file(filename);
+    return file.peek() == ifstream::traits_type::eof();
+}
+
+// Sauvegarder en mémoire les parties précédentes (joueurs, durée, nombre à trouver, score)
 class GameSession {
     public:
         vector<Player> players;
         double duration = 0;
         int number = 0;
         int score = 0;
+
+        void save() {
+            // Préparer les info de la partie en csv pour stocker
+            ostringstream oss;
+            string type;
+
+            if (players.size() == 1) { type = "Solo"; }
+            else { type = "Multijoueurs"; };
+
+            oss << type << "," << number << "," << duration << "," << score << ",";
+            if (players.size() == 1) {
+                oss << "Joueur principal";
+            }
+            else {
+                for (int i = 0; i < players.size(); ++i) {
+                    oss << players[i].username;
+                    if (i < players.size() - 1) {
+                        oss << " - ";
+                    }
+                }
+            }
+
+            ofstream file(getSaveFile(), ios::app);
+
+            // Si fichier vide : on écris les headers csv
+            if (is_file_empty(getSaveFile()))
+            {
+                file << "Type,Nombre,Durée,Tentatives,Joueurs" << endl;
+            }
+
+            // On ajoute les données csv
+            if (file.is_open()) {
+                file << oss.str() << endl;
+                file.close();
+            }
+        }
 };
 
 class Game
@@ -218,7 +272,7 @@ class Game
 
     int generateRandomNumber(int min, int max){
 
-        // Trouver un nombre aléatoire avec le package random
+        // Trouver un nombre aléatoire avec le package random entre min et max
         // TOFIX : Comprendre comment/pourquoi ça fonctionne 😭
         random_device rd;
         mt19937 gen(rd());
@@ -271,6 +325,9 @@ class Game
             // Stocker cette partie
             this->games.emplace_back(storeGame);
 
+            storeGame.save();
+            
+
             this->show("\n\n");
             this->showMenu();
         }
@@ -302,6 +359,7 @@ class Game
         
     }
 
+    // Demander un nombre & message d'erreur si problème (pas int, ...)
     int askForNumberCin()
     {
         int x;
@@ -440,9 +498,10 @@ class Game
         this->show(this->style.get(this->style.get("Menu", "bold"), "underline"));
         this->show("======================");
         this->show("1. Retourner au menu");
+        this->show("2. Ouvrir le fichier des parties récentes");
 
-        // En gros z = 2 car 1 c'est pour lancer le menu (le fait de changer un paramètre commence à 2)
-        int z = 2;
+        // En gros z = 3 car 1 c'est pour lancer le menu et 2 pour les sauvegardes (le fait de changer un paramètre commence à 3)
+        int z = 3;
         for (const auto& setting : this->settings.settings) {
             this->show(to_string(z)+". Changer la valeur de \""+this->style.get(setting.name, "bold") + "\"");
             z++;
@@ -459,9 +518,17 @@ class Game
             this->start();
             this->showMenu();
         }
+        else if (x == 2)
+        {
+            // Lance le fichier csv des parties
+            string command = "start " + getSaveFile();
+            system(command.c_str());
+
+            this->startSettings();
+        }
         else {
-            // x - 2 car on commence à 2 pour le menu alors que l'index des paramètres commence à 0
-            this->askForChangeSetting(x - 2);
+            // x - 3 car on commence à 3 pour le menu alors que l'index des paramètres commence à 0
+            this->askForChangeSetting(x - 3);
         }
 
         
@@ -694,4 +761,5 @@ int main()
     Game game = Game();
     game.start();
     game.showMenu();
+
 }

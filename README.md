@@ -18,6 +18,7 @@ Un jeu simple créé pour un projet d'études
 - Jeu solo
 - Jeu à plusieurs
 - Paramètres
+- Stockage des parties
 
 ## Démo
 
