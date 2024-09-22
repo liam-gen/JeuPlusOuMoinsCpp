@@ -9,14 +9,18 @@
 using namespace std;
 
 #include <iostream>
+
+// Fonctionnement du jeu
 #include <random>
-#include <string>
 #include <windows.h>
 #include <chrono>
+
+// Types
+#include <string>
 #include <map>
 #include <list>
 
-// Accéder à system() pour vider la console
+// Actions systeme
 #include <cstdlib>
 
 // Stockage des parties
@@ -46,7 +50,7 @@ public:
     }
 };
 
-// Classe du joueur (nom, score)
+// Classe du joueur (nom, score) et fonctions
 class Player {
 public:
     string username;
@@ -191,6 +195,7 @@ class Game
 
         GameSession bestTentatives() const {
 
+            // Tant que le score n'est pas mieux que celle d'avant on avance
             auto minSession = this->games.begin();
             for (auto it = this->games.begin(); it != this->games.end(); ++it) {
                 if (it->score < minSession->score) {
@@ -204,6 +209,7 @@ class Game
 
         GameSession bestDuration() const {
 
+            // Tant que le temps n'est pas mieux que celle d'avant on avance
             auto minSession = this->games.begin();
             for (auto it = this->games.begin(); it != this->games.end(); ++it) {
                 if (it->duration < minSession->duration) {
